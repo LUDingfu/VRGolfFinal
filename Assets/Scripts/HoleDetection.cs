@@ -8,12 +8,10 @@ public class HoleDetection : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         
-        Debug.Log("OnTriggerEnter called");
         GolfBallController golfBall = other.GetComponent<GolfBallController>();
         Debug.Log(golfBall.holeDetectionTrigger);
         if (golfBall != null && golfBall.holeDetectionTrigger)
         {
-            Debug.Log("Ball Entered the Hole!");
             StartCoroutine(WaitForBallToStop(golfBall));
         }
     }
@@ -22,6 +20,5 @@ public class HoleDetection : MonoBehaviour
     {
         yield return new WaitForSeconds(timeToDrop);
         ball.Fall(true);
-        Debug.Log("Ball has stopped. Now falling into the hole.");
     }
 }

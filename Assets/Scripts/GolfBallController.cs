@@ -26,9 +26,8 @@ public class GolfBallController : MonoBehaviour
     [SerializeField] private int wrongAngleDistance;
     [SerializeField] private ShotResult currentShotResult;
     [SerializeField] private float fireDelay = 10.0f; 
-    [SerializeField] private float resetDelay = 10.0f; 
-    
-    private float actualSpeed;
+    [SerializeField] private float resetDelay = 10.0f;
+
     private new Rigidbody rigidbody;
     private bool hasFired;
     private bool directionFromGolfToHoleLock;
@@ -39,11 +38,13 @@ public class GolfBallController : MonoBehaviour
     private Collider col;
     private Vector3 startPosition;
     private float timer;
-    public float ActualSpeed => actualSpeed;
-    private bool hasFallen = false;
+    private float speedToStop=0.01f;
+    public float actualSpeed { get; private set; }
+
+    private bool hasFallen;
 
     private enum ShotResult { IntoHole, WrongAngle, Undershoot, Overshoot }
-    public bool holeDetectionTrigger=false;
+    public bool holeDetectionTrigger;
     
     void Start()
     {
@@ -94,7 +95,6 @@ public class GolfBallController : MonoBehaviour
 
     private void MoveBall()
     {
-        Debug.Log("the ball is moving");
         if (!hasFired || hasFallen) return;
         Vector3 targetDirectionVector = (holeTransform.position - transform.position);
         float targetDirectionVectorMagnitude = targetDirectionVector.magnitude;
@@ -115,10 +115,9 @@ public class GolfBallController : MonoBehaviour
         switch (currentShotResult)
         {
             case ShotResult.IntoHole:
-                Debug.Log("intoHole condition");
                 holeDetectionTrigger = true;
                 SetActualSpeed(targetDirectionNormalized, targetDirectionVectorMagnitude, speedFactor);
-                if (rigidbody.velocity.magnitude < 0.01f) speedFactor = 0;
+                if (rigidbody.velocity.magnitude < speedToStop) speedFactor = 0;
                 break;
             
             case ShotResult.WrongAngle:

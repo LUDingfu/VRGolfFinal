@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="360618be-8dd2-4e5b-bd50-e0f18a58d940" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.VRGolfFinal/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.VRGolfFinal/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GolfBallController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GolfBallController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/HoleDetection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/HoleDetection.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +94,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721768818744</updated>
-      <workItem from="1721768820693" duration="2571000" />
+      <workItem from="1721768820693" duration="3417000" />
     </task>
     <servers />
   </component>
