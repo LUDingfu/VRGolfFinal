@@ -339,13 +339,13 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
-  m_Direction: 1
+  m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &604396613
 Transform:
@@ -1024,15 +1024,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedFactor: 1
-  gravity: 9.8
+  gravity: 0.98
   holeTransform: {fileID: 604396613}
   dataSaver: {fileID: 2079951306}
   ballRenderer: {fileID: 0}
   correctPercentage: 100
   wrongAngleChance: 0
   undershootToOvershootRatio: 0
-  undershootDistance: 3
-  overshootDistance: 3
+  undershootDistance: 1
+  overshootDistance: 1
   wrongAngleDistance: 3
   currentShotResult: 0
   fireDelay: 1
@@ -1097,8 +1097,8 @@ Transform:
   m_GameObject: {fileID: 1198234745}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalPosition: {x: 0, y: 0.125, z: 0}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
