@@ -8,11 +8,13 @@ public class Hole : MonoBehaviour
     {
         public float x;
         public float y;
+        public bool trigger;
 
-        public Coordinate(float x, float y)
+        public Coordinate(float x, float y, bool trigger)
         {
             this.x = x;
             this.y = y;
+            this.trigger = trigger;
         }
     }
 
@@ -41,20 +43,31 @@ public class Hole : MonoBehaviour
             {
                 float x = holeCenter.x + (i - offset) * blockSize;
                 float y = holeCenter.y + (j - offset) * blockSize;
-                blockCoordinates.Add(new Coordinate(x, y));
+                
+                bool isCenter = (i == (gridSize - 1) / 2) && (j == (gridSize - 1) / 2);
+                blockCoordinates.Add(new Coordinate(x, y, isCenter));
             }
         }
     }
 
-    public Coordinate GetRandomCoordinate()
+    public Coordinate GetRandomCoordinate(float possibility)
     {
         if (blockCoordinates == null || blockCoordinates.Count == 0)
         {
             return null;
         }
-        int randomIndex = Random.Range(0, blockCoordinates.Count);
-        return blockCoordinates[randomIndex];
+
+        float randomValue = Random.Range(0f, 1f);
+
+        if (randomValue <= possibility)
+        {
+            int randomIndex = Random.Range(0, blockCoordinates.Count);
+            return blockCoordinates[randomIndex];
+        }
+
+        return null;
     }
+
 
     public Coordinate GetCoordinateByIndex(int index)
     {
@@ -76,5 +89,12 @@ public class Hole : MonoBehaviour
         {
             Debug.Log("Coordinate: (" + coord.x + ", " + coord.y + ")");
         }
+    }
+
+    public Vector3 GetPerfectCoordinate()
+    {
+        int centerIndex = (gridSize - 1) / 2 * gridSize + (gridSize - 1) / 2;
+        Coordinate perfectCoordinate = GetCoordinateByIndex(centerIndex);
+        return new Vector3(perfectCoordinate.x, 0, perfectCoordinate.y); 
     }
 }
