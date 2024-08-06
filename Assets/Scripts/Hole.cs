@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 public class Hole : MonoBehaviour
 {
-    [System.Serializable]
+    [Serializable]
     public class Coordinate
     {
         public float x;
@@ -17,13 +19,14 @@ public class Hole : MonoBehaviour
             this.trigger = trigger;
         }
     }
-
-    [SerializeField]
-    private Vector2 holeCenter = new Vector2(0, 0);
+    
     [SerializeField]
     private float blockSize = 1.0f;
     [SerializeField]
     private int gridSize = 5;
+
+    [SerializeField, Range(0f, 1f)] private float errorDistanceScale;
+    
 
     private List<Coordinate> blockCoordinates;
 
@@ -36,14 +39,13 @@ public class Hole : MonoBehaviour
     void FillBlockCoordinates()
     {
         float offset = (gridSize - 1) / 2.0f * blockSize;
-
+        
         for (int i = 0; i < gridSize; i++)
         {
             for (int j = 0; j < gridSize; j++)
             {
-                float x = holeCenter.x + (i - offset) * blockSize;
-                float y = holeCenter.y + (j - offset) * blockSize;
-                
+                float x = transform.position.x + (i - offset) * blockSize * errorDistanceScale;
+                float y = transform.position.z + (j - offset) * blockSize * errorDistanceScale;
                 bool isCenter = (i == (gridSize - 1) / 2) && (j == (gridSize - 1) / 2);
                 blockCoordinates.Add(new Coordinate(x, y, isCenter));
             }
@@ -54,7 +56,7 @@ public class Hole : MonoBehaviour
     {
         if (blockCoordinates == null || blockCoordinates.Count == 0)
         {
-            return null;
+            throw new Exception("Set Block Coordinates or its count!");
         }
 
         float randomValue = Random.Range(0f, 1f);
@@ -64,8 +66,8 @@ public class Hole : MonoBehaviour
             int randomIndex = Random.Range(0, blockCoordinates.Count);
             return blockCoordinates[randomIndex];
         }
+        return new Coordinate(transform.position.x, transform.position.z, false);
 
-        return null;
     }
 
 

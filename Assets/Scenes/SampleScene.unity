@@ -252,6 +252,7 @@ GameObject:
   - component: {fileID: 604396612}
   - component: {fileID: 604396611}
   - component: {fileID: 604396610}
+  - component: {fileID: 604396614}
   m_Layer: 0
   m_Name: Hole
   m_TagString: Untagged
@@ -362,6 +363,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &604396614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604396609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1351a0e9917804148a19bc13334da2f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockSize: 1
+  gridSize: 5
+  errorDistanceScale: 0.31
 --- !u!1 &748821231
 GameObject:
   m_ObjectHideFlags: 0
@@ -1025,18 +1041,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speedFactor: 1
   gravity: 0.98
-  holeTransform: {fileID: 604396613}
+  hole: {fileID: 604396614}
   dataSaver: {fileID: 2079951306}
   ballRenderer: {fileID: 0}
-  correctPercentage: 100
-  wrongAngleChance: 0
-  undershootToOvershootRatio: 0
-  undershootDistance: 1
-  overshootDistance: 1
-  wrongAngleDistance: 3
-  currentShotResult: 0
-  fireDelay: 1
-  resetDelay: 1
+  feedbackGroup: 2
+  possibility: 1
+  hasFallen: 0
   holeDetectionTrigger: 0
 --- !u!23 &1198234748
 MeshRenderer:

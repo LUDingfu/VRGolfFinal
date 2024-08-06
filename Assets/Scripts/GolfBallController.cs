@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -16,12 +17,14 @@ public class GolfBallController : MonoBehaviour
     [Header("Parameters")]   
     private new Rigidbody rigidbody;
     private bool hasFired;
+    private bool hasSelectedRandomTarget;
     private Vector3 targetDirectionNormalized;
     private Collider collider;
     private Vector3 startPosition;
     private float speedToStop=0.01f;
+    private Vector3 targetPosition;
     public float actualSpeed { get; private set; }
-    private bool hasFallen;
+    [SerializeField]private bool hasFallen;
     public bool holeDetectionTrigger;
     
     void Start()
@@ -30,6 +33,7 @@ public class GolfBallController : MonoBehaviour
         targetDirectionNormalized = Vector3.zero;
         rigidbody = GetComponent<Rigidbody>();
         collider = GetComponent<Collider>();
+        targetPosition = GetTargetPosition();
     }
 
     void Update()
@@ -37,8 +41,8 @@ public class GolfBallController : MonoBehaviour
         if (!hasFired)  
         {
             hasFired = true;
-            MoveBall(); 
         }   
+        MoveBall(); 
     }
 
     public void Reset()
@@ -48,6 +52,7 @@ public class GolfBallController : MonoBehaviour
         rigidbody.velocity = Vector3.zero; 
         hasFallen = false;
         collider.isTrigger = false; 
+        targetPosition = GetTargetPosition();
     }
 
     public void Fall(bool state)
@@ -60,33 +65,34 @@ public class GolfBallController : MonoBehaviour
     private void MoveBall()
     {
         if (!hasFired || hasFallen) return;
+        
+        Vector3 targetDirectionVector = (targetPosition - transform.position);
+        float targetDirectionVectorMagnitude = targetDirectionVector.magnitude;
+        targetDirectionNormalized = targetDirectionVector.normalized;
+        SetActualSpeed(targetDirectionNormalized, targetDirectionVectorMagnitude, speedFactor);
+    }
 
-        Vector3 targetPosition = Vector3.zero;
-            
+    private Vector3 GetTargetPosition()
+    {
         switch (feedbackGroup)
         {
             case 1: // Perfect group
-                targetPosition = hole.GetPerfectCoordinate();
+                targetPosition = hole.transform.position;
                 holeDetectionTrigger = true;
-                if (rigidbody.velocity.magnitude < speedToStop) speedFactor = 0;
                 break;
             case 2: // Random feedback group
                 targetPosition = GetRandomCoordinate();
-                if (targetPosition.x==0&&targetPosition.y==0&&targetPosition.z==0)
+                if (targetPosition == hole.transform.position)
                 {
                     holeDetectionTrigger = true;
-                    if (rigidbody.velocity.magnitude < speedToStop) speedFactor = 0;
                 }
                 break;
             case 3: // Adaptive feedback group 
                 targetPosition = GetAdaptiveCoordinate();
                 break;
         }
-        
-        Vector3 targetDirectionVector = (targetPosition - transform.position);
-        float targetDirectionVectorMagnitude = targetDirectionVector.magnitude;
-        Vector3 targetDirectionNormalized = targetDirectionVector.normalized;
-        SetActualSpeed(targetDirectionNormalized, targetDirectionVectorMagnitude, speedFactor);
+
+        return targetPosition;
     }
 
     private Vector3 GetRandomCoordinate()
@@ -118,5 +124,17 @@ public class GolfBallController : MonoBehaviour
         {
             ballRenderer.material.color = newColor;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Debug.DrawRay(transform.position, targetDirectionNormalized);
+        Gizmos.color = Color.red;
+    }
+
+    public void Refire()
+    {
+        Reset();
+        
     }
 }
