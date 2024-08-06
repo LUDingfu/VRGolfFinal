@@ -5,18 +5,17 @@ using Random = UnityEngine.Random;
 
 public class Hole : MonoBehaviour
 {
+    private static System.Random random = new System.Random();
+
     [Serializable]
     public class Coordinate
     {
         public float x;
         public float y;
-        public bool trigger;
-
-        public Coordinate(float x, float y, bool trigger)
+        public Coordinate(float x, float y)
         {
             this.x = x;
             this.y = y;
-            this.trigger = trigger;
         }
     }
     
@@ -25,34 +24,73 @@ public class Hole : MonoBehaviour
     [SerializeField]
     private int gridSize = 5;
 
-    [SerializeField, Range(0f, 1f)] private float errorDistanceScale;
-    
+    // [SerializeField, Range(0f, 1f)] private float errorDistanceScale;
 
+    private List<Coordinate> hasRun;
     private List<Coordinate> blockCoordinates;
 
     void Awake()
     {
         blockCoordinates = new List<Coordinate>();
-        FillBlockCoordinates();
+        
+        // Example list of radii for testing
+        List<float> Radiodistances = RishavAlgo.GenerateValues(30, 1f, 0.05f, 0.3f);
+        FillCoordinatesList(Radiodistances);
     }
 
-    void FillBlockCoordinates()
+    void FillCoordinatesList(List<float> Radiodistances)
     {
-        float offset = (gridSize - 1) / 2.0f * blockSize;
-        
-        for (int i = 0; i < gridSize; i++)
+        int count = 0;
+        int elementsPerBlock = 6;
+        Random random = new Random();
+
+        for (int i = 0; i < 90; i += elementsPerBlock)
         {
-            for (int j = 0; j < gridSize; j++)
+            // Determine the remaining elements in Radiodistances
+            int remainingElements = Radiodistances.Count - count;
+
+            // Ensure at least 1 and at most 5 elements from Radiodistances per block
+            int elementsFromRadiodistances = random.Next(1, Math.Min(elementsPerBlock, remainingElements) + 1);
+
+            // Generate random positions within the block for the selected elements
+            HashSet<int> selectedPositions = new HashSet<int>();
+            while (selectedPositions.Count < elementsFromRadiodistances)
             {
-                float x = transform.position.x + (i - offset) * blockSize * errorDistanceScale;
-                float y = transform.position.z + (j - offset) * blockSize * errorDistanceScale;
-                bool isCenter = (i == (gridSize - 1) / 2) && (j == (gridSize - 1) / 2);
-                blockCoordinates.Add(new Coordinate(x, y, isCenter));
+                selectedPositions.Add(random.Next(0, elementsPerBlock));
             }
+
+            // Fill the block with coordinates
+            for (int j = 0; j < elementsPerBlock; j++)
+            {
+                if (selectedPositions.Contains(j) && count < Radiodistances.Count)
+                {
+                    float angle = (float)(random.NextDouble() * 2 * Mathf.PI);
+                    float x = transform.position.x + Radiodistances[count] * Mathf.Cos(angle);
+                    float y = transform.position.z + Radiodistances[count] * Mathf.Sin(angle);
+                    blockCoordinates.Add(new Coordinate(x, y));
+                    count++;
+                }
+                else
+                {
+                    blockCoordinates.Add(new Coordinate(transform.position.x, transform.position.z));
+                }
+            }
+        }
+
+        // Fill remaining elements from Radiodistances if any
+        while (count < Radiodistances.Count)
+        {
+            float angle = (float)(random.NextDouble() * 2 * Mathf.PI);
+            float x = transform.position.x + Radiodistances[count] * Mathf.Cos(angle);
+            float y = transform.position.z + Radiodistances[count] * Mathf.Sin(angle);
+            blockCoordinates.Add(new Coordinate(x, y));
+            count++;
         }
     }
 
-    public Coordinate GetRandomCoordinate(float possibility)
+
+
+    public Coordinate GetCoordinateInList()
     {
         if (blockCoordinates == null || blockCoordinates.Count == 0)
         {
@@ -66,20 +104,10 @@ public class Hole : MonoBehaviour
             int randomIndex = Random.Range(0, blockCoordinates.Count);
             return blockCoordinates[randomIndex];
         }
-        return new Coordinate(transform.position.x, transform.position.z, false);
-
+        return new Coordinate(transform.position.x, transform.position.z);
     }
 
-
-    public Coordinate GetCoordinateByIndex(int index)
-    {
-        if (blockCoordinates == null || index < 0 || index >= blockCoordinates.Count)
-        {
-            return null;
-        }
-        return blockCoordinates[index];
-    }
-
+    
     public List<Coordinate> GetAllCoordinates()
     {
         return blockCoordinates;
@@ -92,11 +120,5 @@ public class Hole : MonoBehaviour
             Debug.Log("Coordinate: (" + coord.x + ", " + coord.y + ")");
         }
     }
-
-    public Vector3 GetPerfectCoordinate()
-    {
-        int centerIndex = (gridSize - 1) / 2 * gridSize + (gridSize - 1) / 2;
-        Coordinate perfectCoordinate = GetCoordinateByIndex(centerIndex);
-        return new Vector3(perfectCoordinate.x, 0, perfectCoordinate.y); 
-    }
+    
 }

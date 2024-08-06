@@ -98,7 +98,7 @@ public class GolfBallController : MonoBehaviour
 
     private Vector3 GetRandomCoordinate()
     {
-        Hole.Coordinate randomCoordinate = hole.GetRandomCoordinate(possibility);
+        Hole.Coordinate randomCoordinate = hole.GetCoordinateInList();
         if (randomCoordinate != null)
         {
             return new Vector3(randomCoordinate.x, transform.position.y, randomCoordinate.y);
@@ -137,9 +137,5 @@ public class GolfBallController : MonoBehaviour
     {
         Reset();
     }
-
-    public List<float> RishavAlgo(float low, float high, float mean, int n)
-    {
-        
-    }
+    
 }
