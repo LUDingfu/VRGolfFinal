@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -135,6 +136,10 @@ public class GolfBallController : MonoBehaviour
     public void Refire()
     {
         Reset();
+    }
+
+    public List<float> RishavAlgo(float low, float high, float mean, int n)
+    {
         
     }
 }
