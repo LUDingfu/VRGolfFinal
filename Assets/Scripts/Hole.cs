@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
-using Random = UnityEngine.Random;
 
 public class Hole : MonoBehaviour
 {
-    private static System.Random random = new System.Random();
+    private static System.Random random;
+    private List<int> counts;
 
     [Serializable]
     public class Coordinate
@@ -20,105 +20,192 @@ public class Hole : MonoBehaviour
     }
     
     [SerializeField]
-    private float blockSize = 1.0f;
-    [SerializeField]
     private int gridSize = 5;
-
-    // [SerializeField, Range(0f, 1f)] private float errorDistanceScale;
-
+    
     private List<Coordinate> hasRun;
-    private List<Coordinate> blockCoordinates;
 
     void Awake()
     {
-        blockCoordinates = new List<Coordinate>();
+        counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
+            RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
+    }
+    
+    public void GenerateFinalList(List<int> mediumList)
+    {
         
-        // Example list of radii for testing
-        List<float> Radiodistances = RishavAlgo.GenerateValues(30, 1f, 0.05f, 0.3f);
-        FillCoordinatesList(Radiodistances);
-    }
+        List<Coordinate> resultList = new List<Coordinate>();
 
-    void FillCoordinatesList(List<float> Radiodistances)
-    {
-        int count = 0;
-        int elementsPerBlock = 6;
-        Random random = new Random();
-
-        for (int i = 0; i < 90; i += elementsPerBlock)
+        foreach (int value in mediumList)
         {
-            // Determine the remaining elements in Radiodistances
-            int remainingElements = Radiodistances.Count - count;
-
-            // Ensure at least 1 and at most 5 elements from Radiodistances per block
-            int elementsFromRadiodistances = random.Next(1, Math.Min(elementsPerBlock, remainingElements) + 1);
-
-            // Generate random positions within the block for the selected elements
-            HashSet<int> selectedPositions = new HashSet<int>();
-            while (selectedPositions.Count < elementsFromRadiodistances)
+            if (value == 0)
             {
-                selectedPositions.Add(random.Next(0, elementsPerBlock));
+                resultList.Add(new Coordinate(transform.position.x, transform.position.z));
             }
-
-            // Fill the block with coordinates
-            for (int j = 0; j < elementsPerBlock; j++)
+            else if (value == 1)
             {
-                if (selectedPositions.Contains(j) && count < Radiodistances.Count)
+                int index = SelectRandomNonZeroCount();
+                
+                if (index == -1) throw new Exception("There is no more error to choose from the ErrorList");
+
+                switch (index)
                 {
-                    float angle = (float)(random.NextDouble() * 2 * Mathf.PI);
-                    float x = transform.position.x + Radiodistances[count] * Mathf.Cos(angle);
-                    float y = transform.position.z + Radiodistances[count] * Mathf.Sin(angle);
-                    blockCoordinates.Add(new Coordinate(x, y));
-                    count++;
-                }
-                else
-                {
-                    blockCoordinates.Add(new Coordinate(transform.position.x, transform.position.z));
+                    case 0:
+                        counts[0]--;
+                        resultList.Add(GetA());
+                        break;
+                    case 1:
+                        counts[1]--;
+                        resultList.Add(GetB());
+                        break;
+                    case 2:
+                        counts[2]--;
+                        resultList.Add(GetC());
+                        break;
+                    case 3:
+                        counts[3]--;
+                        resultList.Add(GetD());
+                        break;
+                    case 4:
+                        counts[4]--;
+                        resultList.Add(GetE());
+                        break;
+                    case 5:
+                        counts[5]--;
+                        resultList.Add(GetF());
+                        break;
                 }
             }
         }
-
-        // Fill remaining elements from Radiodistances if any
-        while (count < Radiodistances.Count)
-        {
-            float angle = (float)(random.NextDouble() * 2 * Mathf.PI);
-            float x = transform.position.x + Radiodistances[count] * Mathf.Cos(angle);
-            float y = transform.position.z + Radiodistances[count] * Mathf.Sin(angle);
-            blockCoordinates.Add(new Coordinate(x, y));
-            count++;
-        }
     }
 
-
-
-    public Coordinate GetCoordinateInList()
+    private int SelectRandomNonZeroCount()
     {
-        if (blockCoordinates == null || blockCoordinates.Count == 0)
+        List<int> nonZeroIndices = new List<int>();
+        
+        for (int i = 0; i < counts.Count; i++)
         {
-            throw new Exception("Set Block Coordinates or its count!");
+            if (counts[i] > 0)
+            {
+                nonZeroIndices.Add(i);
+            }
         }
 
-        float randomValue = Random.Range(0f, 1f);
-
-        if (randomValue <= possibility)
+        if (nonZeroIndices.Count > 0)
         {
-            int randomIndex = Random.Range(0, blockCoordinates.Count);
-            return blockCoordinates[randomIndex];
+            return nonZeroIndices[random.Next(nonZeroIndices.Count)];
         }
-        return new Coordinate(transform.position.x, transform.position.z);
+        else
+        {
+            throw new Exception("There is some problems in the number of Errors");
+        }
     }
 
-    
-    public List<Coordinate> GetAllCoordinates()
+    private Coordinate GetA()
     {
-        return blockCoordinates;
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
+        {
+            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
+            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
+            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
+            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
     }
 
-    public void PrintCoordinates()
+    private Coordinate GetB()
     {
-        foreach (Coordinate coord in blockCoordinates)
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            Debug.Log("Coordinate: (" + coord.x + ", " + coord.y + ")");
-        }
+            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
+            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
+            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
     }
-    
+
+    private Coordinate GetC()
+    {
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
+        {
+            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
+            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
+            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
+            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
+            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
+    }
+
+    private Coordinate GetD()
+    {
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
+        {
+            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
+            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
+            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
+    }
+
+    private Coordinate GetE()
+    {
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
+        {
+            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
+            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
+            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
+            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
+    }
+
+    private Coordinate GetF()
+    {
+        var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
+        {
+            (transform.position.x - 2.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 2.5f * gridSize, transform.position.z + 4.5f * gridSize)
+        };
+
+        var selectedRange = ranges[random.Next(ranges.Count)];
+
+        float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
+        float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
+
+        return new Coordinate(x,  z);
+    }
 }
