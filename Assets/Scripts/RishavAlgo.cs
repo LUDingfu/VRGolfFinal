@@ -7,9 +7,20 @@ public static class RishavAlgo
 
     public static List<float> GenerateValues(int n, float mean, float low, float high)
     {
-        if (n <= 0) throw new ArgumentException("Number of values must be greater than 0.");
+        if (n != 90) throw new ArgumentException("Number of values must be exactly 90.");
         if (low > mean || mean > high) throw new ArgumentException("The target average must be between the lower and upper bounds.");
         
+        List<float> values = new List<float>();
+
+        List<float> randomDistances = GenerateRandomValues(30, mean, low, high);
+
+        values = DistributeValues(randomDistances);
+
+        return values;
+    }
+
+    private static List<float> GenerateRandomValues(int n, float mean, float low, float high)
+    {
         List<float> values = new List<float>();
         float sum = 0f;
 
@@ -66,5 +77,37 @@ public static class RishavAlgo
             }
             lastValue = targetSum - currentSum;
         }
+    }
+
+    private static List<float> DistributeValues(List<float> randomDistances)
+    {
+        List<float> values = new List<float>(new float[90]);
+        int elementsPerBlock = 6;
+        int randomIndex = 0;
+
+        for (int i = 0; i < 90; i += elementsPerBlock)
+        {
+            // Determine how many elements to use from randomDistances in this block
+            int elementsFromRandomDistances = random.Next(1, Math.Min(elementsPerBlock, randomDistances.Count - randomIndex) + 1);
+
+            // Generate random positions within the block for the selected elements
+            HashSet<int> selectedPositions = new HashSet<int>();
+            while (selectedPositions.Count < elementsFromRandomDistances)
+            {
+                selectedPositions.Add(random.Next(0, elementsPerBlock));
+            }
+
+            // Fill the block with coordinates
+            for (int j = 0; j < elementsPerBlock; j++)
+            {
+                if (selectedPositions.Contains(j) && randomIndex < randomDistances.Count)
+                {
+                    values[i + j] = randomDistances[randomIndex];
+                    randomIndex++;
+                }
+            }
+        }
+
+        return values;
     }
 }
