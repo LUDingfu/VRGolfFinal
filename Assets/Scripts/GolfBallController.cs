@@ -98,7 +98,7 @@ public class GolfBallController : MonoBehaviour
 
     private Vector3 GetRandomCoordinate()
     {
-        Hole.Coordinate randomCoordinate = hole.GetCoordinateInList();
+        Hole.Coordinate randomCoordinate = hole.FinalList[0];
         if (randomCoordinate != null)
         {
             return new Vector3(randomCoordinate.x, transform.position.y, randomCoordinate.y);

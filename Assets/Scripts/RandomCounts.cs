@@ -49,12 +49,13 @@ class RandomCounts
         count_E = counts[4];
         count_F = counts[5];
     }
-    static List<int> ShuffleList(List<int> list)
+
+    public static List<int> ShuffleList(List<int> list)
     {
-        if (list.Count != 15)
-        {
-            throw new Exception("The list should have exactly 15 elements.");
-        }
+        // if (list.Count != 15)
+        // {
+        //     throw new Exception("The list should have exactly 15 elements.");
+        // }
         Random rand = new Random();
         for (int i = list.Count - 1; i > 0; i--)
         {
@@ -65,7 +66,7 @@ class RandomCounts
         }
         return list;
     }
-    static List<int> GenerateMediumList(List<int> shuffledErrorList)
+    public static List<int> GenerateMediumList(List<int> shuffledErrorList)
     {
         if (shuffledErrorList.Count != 15)
         {

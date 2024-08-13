@@ -6,7 +6,10 @@ public class Hole : MonoBehaviour
 {
     private static System.Random random;
     private List<int> counts;
-
+    private List<int> errorList;
+    private List<int> errorListShuffled;
+    private List<int> mediumList;
+    public List<Coordinate> FinalList;
     [Serializable]
     public class Coordinate
     {
@@ -28,9 +31,13 @@ public class Hole : MonoBehaviour
     {
         counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
             RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
+        errorList = new List<int> { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5 };
+        errorListShuffled = RandomCounts.ShuffleList(errorList);
+        mediumList = RandomCounts.GenerateMediumList(errorListShuffled);
+        FinalList = GenerateFinalList(mediumList);
     }
     
-    public void GenerateFinalList(List<int> mediumList)
+    public List<Coordinate> GenerateFinalList(List<int> mediumList)
     {
         
         List<Coordinate> resultList = new List<Coordinate>();
@@ -76,6 +83,11 @@ public class Hole : MonoBehaviour
                 }
             }
         }
+        if (resultList.Count!=90)
+        {
+            throw new Exception("There should be 90 elements");
+        }
+        return resultList;
     }
 
     private int SelectRandomNonZeroCount()
