@@ -52,10 +52,7 @@ class RandomCounts
 
     public static List<int> ShuffleList(List<int> list)
     {
-        // if (list.Count != 15)
-        // {
-        //     throw new Exception("The list should have exactly 15 elements.");
-        // }
+        
         Random rand = new Random();
         for (int i = list.Count - 1; i > 0; i--)
         {

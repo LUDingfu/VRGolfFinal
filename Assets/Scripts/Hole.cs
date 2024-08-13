@@ -52,8 +52,6 @@ public class Hole : MonoBehaviour
             {
                 int index = SelectRandomNonZeroCount();
                 
-                if (index == -1) throw new Exception("There is no more error to choose from the ErrorList");
-
                 switch (index)
                 {
                     case 0:
@@ -92,24 +90,13 @@ public class Hole : MonoBehaviour
 
     private int SelectRandomNonZeroCount()
     {
-        List<int> nonZeroIndices = new List<int>();
+        int randomIndex = random.Next(0, counts.Count);
+        if (counts[randomIndex] > 0)
+        {
+            return randomIndex;
+        }
+        return SelectRandomNonZeroCount();
         
-        for (int i = 0; i < counts.Count; i++)
-        {
-            if (counts[i] > 0)
-            {
-                nonZeroIndices.Add(i);
-            }
-        }
-
-        if (nonZeroIndices.Count > 0)
-        {
-            return nonZeroIndices[random.Next(nonZeroIndices.Count)];
-        }
-        else
-        {
-            throw new Exception("There is some problems in the number of Errors");
-        }
     }
 
     private Coordinate GetA()
