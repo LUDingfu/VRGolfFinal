@@ -66,6 +66,10 @@ public class GolfBallController : MonoBehaviour
         Vector2 currCoordinate = hole.FinalList[currIdx];
         targetPosition = new Vector3(currCoordinate.x, floorHeight, currCoordinate.y);
         currIdx++;
+        if (targetPosition.x == hole.transform.position.x && targetPosition.z == hole.transform.position.z)
+        {
+            holeDetectionTrigger = true;
+        }
     }
 
     public void Fall(bool state)
