@@ -15,32 +15,22 @@ class RandomCounts
 
     private static Random rand;
 
-    private void GenerateCounts()
+    public static void GenerateCounts()
     {
         int[] counts = new int[6];
         int sum = 0;
-
+        int totalError = 30;
         for (int i = 0; i < counts.Length; i++)
         {
-            counts[i] = rand.Next(1, 10);
-            sum += counts[i];
+            counts[i] = 1;
+            sum++;
         }
-        
-        while (sum != 30)
+        Random random = new Random();
+        while (sum < totalError)
         {
-            int diff = 30 - sum;
-            int randomIndex = rand.Next(0, counts.Length);
-
-            if (diff > 0)
-            {
-                counts[randomIndex]++;
-                sum++;
-            }
-            else if (diff < 0 && counts[randomIndex] > 1)
-            {
-                counts[randomIndex]--;
-                sum--;
-            }
+            int randomIndex = random.Next(0, counts.Length);
+            counts[randomIndex]++;
+            sum++;
         }
         count_A = counts[0];
         count_B = counts[1];

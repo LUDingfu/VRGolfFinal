@@ -10,6 +10,9 @@ public class GolfBallController : MonoBehaviour
     [SerializeField] private Hole hole; 
     [SerializeField] private DataSaver dataSaver;
     [SerializeField] private Renderer ballRenderer;
+    [SerializeField, Tooltip("Set this to the y value of the golf ball and hole")] 
+    private float floorHeight = 0f;
+    
     
     [Header("Feedback Groups")]
     [SerializeField] private int feedbackGroup; // 1 = Perfect, 2 = Random, 3 = Adaptive
@@ -24,6 +27,7 @@ public class GolfBallController : MonoBehaviour
     private Vector3 startPosition;
     private float speedToStop=0.01f;
     private Vector3 targetPosition;
+    private int currIdx = 0;
     public float actualSpeed { get; private set; }
     [SerializeField]private bool hasFallen;
     public bool holeDetectionTrigger;
@@ -50,10 +54,18 @@ public class GolfBallController : MonoBehaviour
     {
         hasFired = false;
         transform.position = startPosition;
+        transform.rotation = Quaternion.identity;
         rigidbody.velocity = Vector3.zero; 
         hasFallen = false;
         collider.isTrigger = false; 
         targetPosition = GetTargetPosition();
+    }
+
+    private void PrepareNextTrial()
+    {
+        Vector2 currCoordinate = hole.FinalList[currIdx];
+        targetPosition = new Vector3(currCoordinate.x, floorHeight, currCoordinate.y);
+        currIdx++;
     }
 
     public void Fall(bool state)
@@ -75,30 +87,27 @@ public class GolfBallController : MonoBehaviour
 
     private Vector3 GetTargetPosition()
     {
-        switch (feedbackGroup)
-        {
-            case 1: // Perfect group
-                targetPosition = hole.transform.position;
-                holeDetectionTrigger = true;
-                break;
-            case 2: // Random feedback group
-                targetPosition = GetRandomCoordinate();
-                if (targetPosition == hole.transform.position)
-                {
-                    holeDetectionTrigger = true;
-                }
-                break;
-            case 3: // Adaptive feedback group 
-                targetPosition = GetAdaptiveCoordinate();
-                break;
-        }
-
+        PrepareNextTrial();
+        // switch (feedbackGroup)
+        // {
+        //     case 1: // Perfect group
+        //         holeDetectionTrigger = true;
+        //         break;
+        //     case 2: // Random feedback group
+        //         if (targetPosition == hole.transform.position)
+        //         {
+        //             holeDetectionTrigger = true;
+        //         }
+        //         break;
+        //     case 3: // Adaptive feedback group 
+        //         break;
+        // }
         return targetPosition;
     }
-
+    
     private Vector3 GetRandomCoordinate()
     {
-        Hole.Coordinate randomCoordinate = hole.FinalList[0];
+        Vector2 randomCoordinate = hole.FinalList[0];
         if (randomCoordinate != null)
         {
             return new Vector3(randomCoordinate.x, transform.position.y, randomCoordinate.y);

@@ -1,34 +1,32 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using Random = System.Random;
 
 public class Hole : MonoBehaviour
 {
-    private static System.Random random;
-    private List<int> counts;
-    private List<int> errorList;
-    private List<int> errorListShuffled;
-    private List<int> mediumList;
-    public List<Coordinate> FinalList;
-    [Serializable]
-    public class Coordinate
+    private Random random = new Random();
+    private List<int> counts = new List<int>();
+    private List<int> errorList= new List<int>();
+    private List<int> errorListShuffled= new List<int>();
+    private List<int> mediumList= new List<int>();
+    public List<Vector2> FinalList= new List<Vector2>();
+    
+
+    public class Block
     {
-        public float x;
-        public float y;
-        public Coordinate(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
+        
     }
     
     [SerializeField]
     private int gridSize = 5;
     
-    private List<Coordinate> hasRun;
+    private List<Vector2> hasRun;
 
     void Awake()
     {
+        RandomCounts.GenerateCounts();
         counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
             RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
         errorList = new List<int> { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5 };
@@ -37,16 +35,16 @@ public class Hole : MonoBehaviour
         FinalList = GenerateFinalList(mediumList);
     }
     
-    public List<Coordinate> GenerateFinalList(List<int> mediumList)
+    public List<Vector2> GenerateFinalList(List<int> mediumList)
     {
         
-        List<Coordinate> resultList = new List<Coordinate>();
+        List<Vector2> resultList = new List<Vector2>();
 
         foreach (int value in mediumList)
         {
             if (value == 0)
             {
-                resultList.Add(new Coordinate(transform.position.x, transform.position.z));
+                resultList.Add(new Vector2(transform.position.x, transform.position.z));
             }
             else if (value == 1)
             {
@@ -96,10 +94,9 @@ public class Hole : MonoBehaviour
             return randomIndex;
         }
         return SelectRandomNonZeroCount();
-        
     }
 
-    private Coordinate GetA()
+    private Vector2 GetA()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -114,10 +111,10 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
     }
 
-    private Coordinate GetB()
+    private Vector2 GetB()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -132,10 +129,10 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
     }
 
-    private Coordinate GetC()
+    private Vector2 GetC()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -154,10 +151,10 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
     }
 
-    private Coordinate GetD()
+    private Vector2 GetD()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -172,10 +169,10 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
     }
 
-    private Coordinate GetE()
+    private Vector2 GetE()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -190,10 +187,10 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
     }
 
-    private Coordinate GetF()
+    private Vector2 GetF()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
@@ -205,6 +202,29 @@ public class Hole : MonoBehaviour
         float x = (float)(random.NextDouble() * (selectedRange.xMax - selectedRange.xMin) + selectedRange.xMin);
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
-        return new Coordinate(x,  z);
+        return new Vector2(x,  z);
+    }
+
+    private void AssertListsEqual<T>(List<T> list1, List<T> list2)
+    {
+        if (list1.Count != list2.Count)
+        {
+            Debug.LogError("Lists do not have the same number of elements.");
+            return;
+        }
+
+        var sortedList1 = list1.OrderBy(item => item).ToList();
+        var sortedList2 = list2.OrderBy(item => item).ToList();
+
+        for (int i = 0; i < sortedList1.Count; i++)
+        {
+            if (!sortedList1[i].Equals(sortedList2[i]))
+            {
+                Debug.LogError("Lists do not contain the same elements.");
+                return;
+            }
+        }
+
+        Debug.Log("Lists contain the same elements.");
     }
 }
