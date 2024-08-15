@@ -12,15 +12,12 @@ public class Hole : MonoBehaviour
     private List<int> errorListShuffled= new List<int>();
     private List<int> mediumList= new List<int>();
     public List<Vector2> FinalList= new List<Vector2>();
+    public Vector2 holeTransformation;
+    public List<Vector2> finalAdaptiveList;
     
-
-    public class Block
-    {
-        
-    }
     
     [SerializeField]
-    private int gridSize = 5;
+    private float gridSize = 1;
     
     private List<Vector2> hasRun;
 
@@ -29,10 +26,11 @@ public class Hole : MonoBehaviour
         RandomCounts.GenerateCounts();
         counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
             RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
-        errorList = new List<int> { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5 };
+        errorList = new List<int> { 5, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1 };
         errorListShuffled = RandomCounts.ShuffleList(errorList);
         mediumList = RandomCounts.GenerateMediumList(errorListShuffled);
         FinalList = GenerateFinalList(mediumList);
+        holeTransformation = new Vector2(holeTransformation.x, holeTransformation.y);
     }
     
     public List<Vector2> GenerateFinalList(List<int> mediumList)
@@ -44,7 +42,7 @@ public class Hole : MonoBehaviour
         {
             if (value == 0)
             {
-                resultList.Add(new Vector2(transform.position.x, transform.position.z));
+                resultList.Add(new Vector2(holeTransformation.x, holeTransformation.y));
             }
             else if (value == 1)
             {
@@ -96,14 +94,105 @@ public class Hole : MonoBehaviour
         return SelectRandomNonZeroCount();
     }
 
-    private Vector2 GetA()
+
+
+    
+    public float CalculateMRE(List<Vector2> coordinateList)
+    {
+        float totalError = 0f;
+        int count = coordinateList.Count;
+
+        if (count == 0)
+            return 0f;
+
+        foreach (Vector2 coordinate in coordinateList)
+        {
+            Vector2 errorVector = coordinate - holeTransformation;
+
+            totalError += errorVector.magnitude;
+        }
+        float meanError = totalError / count;
+        return meanError;
+    }
+    public List<Vector2> GenerateAdaptiveList(List<int> errorList)
+    {
+        finalAdaptiveList = new List<Vector2>();
+        int elementEachBlock = 6;
+        float initialMRE = CalculateMRE(new List<Vector2> { GetE(), GetF(), GetE(), GetE(), GetE(), holeTransformation });
+        float MRELastTime = initialMRE;
+
+        if (errorList.Count != 15)
+        {
+            throw new Exception("The errorList should have exactly 15 elements.");
+        }
+
+        for (int i = 0; i < errorList.Count; i++)
+        {
+            bool findLowerMRE = false;
+            List<Vector2> block = new List<Vector2>();
+            int numberOfErrorsThisBlock = errorList[i];
+            for (int j = 0; j < elementEachBlock - numberOfErrorsThisBlock; j++)
+            {
+                block.Add(holeTransformation);
+            }
+
+            while (!findLowerMRE)
+            {
+                List<Vector2> errorListInOneBlock = RandomGenerateErrorList(numberOfErrorsThisBlock);
+                block.AddRange(errorListInOneBlock);
+                float MRE_ThisTempBlockList = CalculateMRE(block);
+                if (MRE_ThisTempBlockList < MRELastTime)
+                {
+                    finalAdaptiveList.AddRange(block);
+                    MRELastTime = MRE_ThisTempBlockList;
+                    findLowerMRE = true;
+                }
+            }
+        }
+        return finalAdaptiveList;
+    }
+    
+
+    private List<Vector2> RandomGenerateErrorList(int numberOfErrorsThisBlock)
+    {
+        List<Vector2> errorListInOneBlock = new List<Vector2>(numberOfErrorsThisBlock);
+        int numberOfErrors = 6;
+        for (int i = 0; i < numberOfErrors; i++)
+        {
+            int randomNumber=random.Next(0, numberOfErrors);
+            switch (randomNumber)
+            {
+                case 0:
+                    errorListInOneBlock.Add(GetA());
+                    break;
+                case 1:
+                    errorListInOneBlock.Add(GetB());
+                    break;
+                case 2:
+                    errorListInOneBlock.Add(GetC());
+                    break;
+                case 3:
+                    errorListInOneBlock.Add(GetD());
+                    break;
+                case 4:
+                    errorListInOneBlock.Add(GetE());
+                    break;
+                case 5:
+                    errorListInOneBlock.Add(GetF());
+                    break;
+            }
+        }
+
+        return errorListInOneBlock;
+    }
+        private Vector2 GetA()
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
-            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
-            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
-            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+            (holeTransformation.x + 0.5f * gridSize, holeTransformation.x + 1.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize),
+            (holeTransformation.x - 1.5f * gridSize, holeTransformation.x - 0.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize),
+            (holeTransformation.x - 0.5f * gridSize, holeTransformation.x + 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize),
+            (holeTransformation.x - 0.5f * gridSize, holeTransformation.x + 0.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y - 1.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -118,10 +207,10 @@ public class Hole : MonoBehaviour
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
-            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
-            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+            (holeTransformation.x + 0.5f * gridSize, holeTransformation.x + 1.5f * gridSize, holeTransformation.y + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize),
+            (holeTransformation.x - 1.5f * gridSize, holeTransformation.x - 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize),
+            (holeTransformation.x + 0.5f * gridSize, holeTransformation.x + 1.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x - 1.5f * gridSize, holeTransformation.x - 0.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y - 1.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -136,14 +225,14 @@ public class Hole : MonoBehaviour
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
-            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
-            (transform.position.x + 0.5f * gridSize, transform.position.x + 1.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x - 1.5f * gridSize, transform.position.x - 0.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
-            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z + 0.5f * gridSize, transform.position.z + 1.5f * gridSize),
-            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z - 1.5f * gridSize)
+            (holeTransformation.x + 0.5f * gridSize, holeTransformation.x + 1.5f * gridSize, holeTransformation.y + 1.5f * gridSize, holeTransformation.y + 2.5f * gridSize),
+            (holeTransformation.x - 1.5f * gridSize, holeTransformation.x - 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize, holeTransformation.y + 2.5f * gridSize),
+            (holeTransformation.x + 0.5f * gridSize, holeTransformation.x + 1.5f * gridSize, holeTransformation.y - 2.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x - 1.5f * gridSize, holeTransformation.x - 0.5f * gridSize, holeTransformation.y - 2.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x + 1.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize),
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x - 1.5f * gridSize, holeTransformation.y + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize),
+            (holeTransformation.x + 1.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x - 1.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y - 1.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -158,10 +247,10 @@ public class Hole : MonoBehaviour
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
-            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize),
-            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize)
+            (holeTransformation.x + 1.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y + 1.5f * gridSize, holeTransformation.y + 2.5f * gridSize),
+            (holeTransformation.x + 1.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y - 2.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x - 1.5f * gridSize, holeTransformation.y + 1.5f * gridSize, holeTransformation.y + 2.5f * gridSize),
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x - 1.5f * gridSize, holeTransformation.y - 2.5f * gridSize, holeTransformation.y - 1.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -176,10 +265,10 @@ public class Hole : MonoBehaviour
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x + 1.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
-            (transform.position.x - 2.5f * gridSize, transform.position.x - 1.5f * gridSize, transform.position.z - 0.5f * gridSize, transform.position.z + 0.5f * gridSize),
-            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z - 2.5f * gridSize, transform.position.z - 1.5f * gridSize),
-            (transform.position.x - 0.5f * gridSize, transform.position.x + 0.5f * gridSize, transform.position.z + 1.5f * gridSize, transform.position.z + 2.5f * gridSize)
+            (holeTransformation.x + 1.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize),
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x - 1.5f * gridSize, holeTransformation.y - 0.5f * gridSize, holeTransformation.y + 0.5f * gridSize),
+            (holeTransformation.x - 0.5f * gridSize, holeTransformation.x + 0.5f * gridSize, holeTransformation.y - 2.5f * gridSize, holeTransformation.y - 1.5f * gridSize),
+            (holeTransformation.x - 0.5f * gridSize, holeTransformation.x + 0.5f * gridSize, holeTransformation.y + 1.5f * gridSize, holeTransformation.y + 2.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -194,7 +283,7 @@ public class Hole : MonoBehaviour
     {
         var ranges = new List<(float xMin, float xMax, float zMin, float zMax)>
         {
-            (transform.position.x - 2.5f * gridSize, transform.position.x + 2.5f * gridSize, transform.position.z + 2.5f * gridSize, transform.position.z + 4.5f * gridSize)
+            (holeTransformation.x - 2.5f * gridSize, holeTransformation.x + 2.5f * gridSize, holeTransformation.y + 2.5f * gridSize, holeTransformation.y + 4.5f * gridSize)
         };
 
         var selectedRange = ranges[random.Next(ranges.Count)];
@@ -203,28 +292,5 @@ public class Hole : MonoBehaviour
         float z = (float)(random.NextDouble() * (selectedRange.zMax - selectedRange.zMin) + selectedRange.zMin);
 
         return new Vector2(x,  z);
-    }
-
-    private void AssertListsEqual<T>(List<T> list1, List<T> list2)
-    {
-        if (list1.Count != list2.Count)
-        {
-            Debug.LogError("Lists do not have the same number of elements.");
-            return;
-        }
-
-        var sortedList1 = list1.OrderBy(item => item).ToList();
-        var sortedList2 = list2.OrderBy(item => item).ToList();
-
-        for (int i = 0; i < sortedList1.Count; i++)
-        {
-            if (!sortedList1[i].Equals(sortedList2[i]))
-            {
-                Debug.LogError("Lists do not contain the same elements.");
-                return;
-            }
-        }
-
-        Debug.Log("Lists contain the same elements.");
     }
 }

@@ -60,7 +60,6 @@ class RandomCounts
             throw new Exception("The shuffledErrorList should have exactly 15 elements.");
         }
         List<int> mediumList = new List<int>();
-        Random rand = new Random();
 
         foreach (int errorCount in shuffledErrorList)
         {
