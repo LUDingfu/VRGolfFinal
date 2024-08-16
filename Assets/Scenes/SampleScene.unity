@@ -375,9 +375,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1351a0e9917804148a19bc13334da2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockSize: 1
-  gridSize: 5
-  errorDistanceScale: 0.31
+  FinalList: []
+  holeTransformation: {x: 0, y: 0}
+  finalAdaptiveList: []
+  gridSize: 0.8
 --- !u!1 &748821231
 GameObject:
   m_ObjectHideFlags: 0
@@ -1044,6 +1045,7 @@ MonoBehaviour:
   hole: {fileID: 604396614}
   dataSaver: {fileID: 2079951306}
   ballRenderer: {fileID: 0}
+  floorHeight: 0
   feedbackGroup: 2
   possibility: 1
   hasFallen: 0

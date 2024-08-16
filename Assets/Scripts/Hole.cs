@@ -23,17 +23,42 @@ public class Hole : MonoBehaviour
 
     void Awake()
     {
-        RandomCounts.GenerateCounts();
-        counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
-            RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
-        errorList = new List<int> { 5, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1 };
-        errorListShuffled = RandomCounts.ShuffleList(errorList);
-        mediumList = RandomCounts.GenerateMediumList(errorListShuffled);
-        FinalList = GenerateFinalList(mediumList);
         holeTransformation = new Vector2(holeTransformation.x, holeTransformation.y);
+        int feedbackGroup=FindObjectOfType<GolfBallController>().feedbackGroup;
+        if (feedbackGroup==1)
+        {
+            FinalList = GeneratePerfectFeedbackList();
+        }
+
+        if (feedbackGroup==2)
+        {
+            RandomCounts.GenerateCounts();
+            counts = new List<int> { RandomCounts.count_A, RandomCounts.count_B, RandomCounts.count_C, 
+                RandomCounts.count_D, RandomCounts.count_E, RandomCounts.count_F };
+            errorList = new List<int> { 5, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1 };
+            errorListShuffled = RandomCounts.ShuffleList(errorList);
+            mediumList = RandomCounts.GenerateMediumList(errorListShuffled);
+            FinalList = GenerateRandomFeedbackList(mediumList);
+        }
+        if (feedbackGroup==3)
+        {
+            errorList = new List<int> { 5, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1 };
+            FinalList = GenerateAdaptiveFeedbackList(errorList);
+        }
     }
-    
-    public List<Vector2> GenerateFinalList(List<int> mediumList)
+
+    public List<Vector2> GeneratePerfectFeedbackList()
+    {
+        int numOfTrails = 90;
+        List<Vector2> perfectFeedbackList = new List<Vector2>();
+        for (int i = 0; i < numOfTrails; i++)
+        {
+            perfectFeedbackList.Add(holeTransformation);
+        }
+        return perfectFeedbackList;
+    }
+
+    public List<Vector2> GenerateRandomFeedbackList(List<int> mediumList)
     {
         
         List<Vector2> resultList = new List<Vector2>();
@@ -94,8 +119,6 @@ public class Hole : MonoBehaviour
         return SelectRandomNonZeroCount();
     }
 
-
-
     
     public float CalculateMRE(List<Vector2> coordinateList)
     {
@@ -114,7 +137,7 @@ public class Hole : MonoBehaviour
         float meanError = totalError / count;
         return meanError;
     }
-    public List<Vector2> GenerateAdaptiveList(List<int> errorList)
+    public List<Vector2> GenerateAdaptiveFeedbackList(List<int> errorList)
     {
         finalAdaptiveList = new List<Vector2>();
         int elementEachBlock = 6;

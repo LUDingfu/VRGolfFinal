@@ -15,8 +15,7 @@ public class GolfBallController : MonoBehaviour
     
     
     [Header("Feedback Groups")]
-    [SerializeField] private int feedbackGroup; // 1 = Perfect, 2 = Random, 3 = Adaptive
-    [SerializeField] private float possibility; // Used for Group 2 and Group 3
+    [SerializeField] public int feedbackGroup; // 1 = Perfect, 2 = Random, 3 = Adaptive
     
     [Header("Parameters")]   
     private new Rigidbody rigidbody;
@@ -25,7 +24,7 @@ public class GolfBallController : MonoBehaviour
     private Vector3 targetDirectionNormalized;
     private Collider collider;
     private Vector3 startPosition;
-    private float speedToStop=0.01f;
+    private float speedToStop = 0.01f;
     private Vector3 targetPosition;
     private int currIdx = 0;
     public float actualSpeed { get; private set; }
@@ -63,6 +62,7 @@ public class GolfBallController : MonoBehaviour
 
     private void PrepareNextTrial()
     {
+        
         Vector2 currCoordinate = hole.FinalList[currIdx];
         targetPosition = new Vector3(currCoordinate.x, floorHeight, currCoordinate.y);
         currIdx++;
@@ -92,20 +92,6 @@ public class GolfBallController : MonoBehaviour
     private Vector3 GetTargetPosition()
     {
         PrepareNextTrial();
-        // switch (feedbackGroup)
-        // {
-        //     case 1: // Perfect group
-        //         holeDetectionTrigger = true;
-        //         break;
-        //     case 2: // Random feedback group
-        //         if (targetPosition == hole.transform.position)
-        //         {
-        //             holeDetectionTrigger = true;
-        //         }
-        //         break;
-        //     case 3: // Adaptive feedback group 
-        //         break;
-        // }
         return targetPosition;
     }
     
